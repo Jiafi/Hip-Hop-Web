@@ -1,15 +1,9 @@
 #!/usr/bin/env python
 
 import lyricsgenius
-genius = lyricsgenius.Genius("Ac918_2foSjtvsZXSydkug3UIGI3cUerNAVVkdhPDsZKM5gbOBkuiRmrXRjtGhmD")
-#artist = genius.search_artist("Kanye West", sort="popularity", max_songs=3)
-#songs = artist.songs
-#for artist in songs[0].producers:
-#print(artist)
-song = genius.search_song('no more parties in la', 'Kanye West')
-print(song.producers)
+import networkx as nx
 
-class Artst:
+class Artist:
 
   def __init__(self, name, genius):
     self.name = name
@@ -17,5 +11,20 @@ class Artst:
     self.__artists = set([name])
     # genius api object expected
     self.__genius = genius
+    self.__graph = nx.Graph()
+    self.__graph.add_node(name)
 
-  def
+  def  create_graph_dfs(self, limit):
+    queue = Queue(maxsize=limit)
+    queue.put(self.name)
+    visited = set()
+    while(len(self.__artists) <= limit):
+      current_artist = queue.get()
+      visited.add(current_artist)
+      current_features = set()
+      artist = genius.search_artist(current_artist, max_songs=20)
+      for(song in artist.songs):
+
+
+genius = lyricsgenius.Genius("Ac918_2foSjtvsZXSydkug3UIGI3cUerNAVVkdhPDsZKM5gbOBkuiRmrXRjtGhmD")
+kanye = Artist("kanye", genius)
