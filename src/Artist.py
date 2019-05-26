@@ -2,6 +2,7 @@
 
 import lyricsgenius
 import networkx as nx
+import matplotlib.pyplot as plt
 
 class Artist:
 
@@ -18,12 +19,25 @@ class Artist:
     queue = Queue(maxsize=limit)
     queue.put(self.name)
     visited = set()
-    while(len(self.__artists) <= limit):
+    while(len(self.__artists) <= limit and not queue.empty):
       current_artist = queue.get()
       visited.add(current_artist)
       current_features = set()
       artist = genius.search_artist(current_artist, max_songs=20)
-      for(song in artist.songs):
+      # Get artists associated with current artist
+      for song in artist.songs:
+        current_features.update(song.featured_artists)
+        current_features.update(song.producers)
+      # Create tuples to add edges
+      edges = []
+      for feature in current_features:
+        # Adding edges and to the queue
+        if feature not in visited:
+          queue.put(feature)
+        edges.append((current_artist, feature))
+      # add features to graph
+      self.__graph.add_edges_from(edges)
+      # Done processing features
 
 
 genius = lyricsgenius.Genius("Ac918_2foSjtvsZXSydkug3UIGI3cUerNAVVkdhPDsZKM5gbOBkuiRmrXRjtGhmD")
