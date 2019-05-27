@@ -21,36 +21,54 @@ class Artist:
     artist_queue = queue.Queue()
     artist_queue.put(self.name)
     visited = set()
-    while(len(self.__artists) <= limit and not artist_queue.empty()):
+    visited_songs = set()
+    while(len(visited) <= limit and not artist_queue.empty()):
       current_artist = artist_queue.get()
       visited.add(current_artist)
-      current_features = set()
       artist = genius.search_artist(current_artist, max_songs=2, sort='popularity')
       # Get artists associated with current artist
       for song in artist.songs:
-        for feature in song.featured_artists:
-          current_features.add(feature['name'])
-        for feature in song.producers:
-          current_features.add(feature['name'])
+        # Do not want to repeat songs, waste of processing
+        if (song.title not in visited_songs):
+          visited_songs.add(song.title)
+          # Add to queue in this block such that queue is by popularity of the song
+          # it adds weight to edges based on # of features
+          current_features = set()
+          for feature in song.featured_artists:
+            current_features.add(feature['name'])
+          #for feature in song.producers:
+            #current_features.add(feature['name'])
 
-      # Create tuples to add edges
-      edges = []
-      for feature in current_features:
-        # Adding edges and to the queue
-        print(feature)
-        if feature not in visited:
-          artist_queue.put(feature)
-        edges.append((current_artist, feature))
-      # add features to graph
-      self.__graph.add_edges_from(edges)
-      # Done processing features
+          # Create tuples to add edges
+          # add features to graph
+          # Done processing features
+          for feature in current_features:
+            # Adding edges and to the queue
+            self.__increment_edge(current_artist, feature)
+            if feature not in visited:
+              artist_queue.put(feature)
 
   def show_graph(self):
     plt.subplot(121)
-    nx.draw(self.__graph, with_labels=True)
+    plot = nx.draw(self.__graph, with_labels=True)
+    #plot.set_size_inches(18.5, 10.5, forward=True)
     plt.show()
 
+  def __increment_edge(self, source, dest):
+    edge = self.__graph.get_edge_data(source, dest)
+    if edge is None:
+      self.__graph.add_edge(source, dest, weight=1)
+    else:
+      self.__graph.add_edge(source, dest, weight=edge['weight']+1)
+    print(self.__graph.get_edge_data(source, dest))
+
 genius = lyricsgenius.Genius("Ac918_2foSjtvsZXSydkug3UIGI3cUerNAVVkdhPDsZKM5gbOBkuiRmrXRjtGhmD")
-kanye = Artist("kanye west", genius)
-kanye.create_graph_bfs(5)
+kanye = Artist("Kanye West", genius)
+kanye.create_graph_bfs(2)
 kanye.show_graph()
+#madlib = Artist("Madlib", genius)
+#madlib.create_graph_bfs(2)
+#madlib.show_graph()
+#jamestaylor = Artist("James Taylor", genius)
+#jamestaylor.create_graph_bfs(2)
+#jamestaylor.show_graph()
