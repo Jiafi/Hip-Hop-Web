@@ -17,15 +17,15 @@ class Artist:
 
   # BFS with additional processing to create edges and other info
   # BFS will show more closely related artists than DFS
-  def create_graph_bfs(self, limit):
+  def create_graph_bfs(self, artist_limit=10, song_limit=20):
     artist_queue = queue.Queue()
     artist_queue.put(self.name)
     visited = set()
     visited_songs = set()
-    while(len(visited) <= limit and not artist_queue.empty()):
+    while(len(visited) <= artist_limit and not artist_queue.empty()):
       current_artist = artist_queue.get()
       visited.add(current_artist)
-      artist = genius.search_artist(current_artist, max_songs=2, sort='popularity')
+      artist = genius.search_artist(current_artist, max_songs=song_limit, sort='popularity')
       # Get artists associated with current artist
       for song in artist.songs:
         # Do not want to repeat songs, waste of processing
@@ -49,9 +49,11 @@ class Artist:
               artist_queue.put(feature)
 
   def show_graph(self):
+
     plt.subplot(121)
+
+    plt.figure(figsize=(18.5, 11.5))
     plot = nx.draw(self.__graph, with_labels=True)
-    #plot.set_size_inches(18.5, 10.5, forward=True)
     plt.show()
 
   def __increment_edge(self, source, dest):
@@ -62,13 +64,11 @@ class Artist:
       self.__graph.add_edge(source, dest, weight=edge['weight']+1)
     print(self.__graph.get_edge_data(source, dest))
 
-genius = lyricsgenius.Genius("Ac918_2foSjtvsZXSydkug3UIGI3cUerNAVVkdhPDsZKM5gbOBkuiRmrXRjtGhmD")
-kanye = Artist("Kanye West", genius)
-kanye.create_graph_bfs(2)
-kanye.show_graph()
+if __name__ == "__main__":
+  genius = lyricsgenius.Genius("Ac918_2foSjtvsZXSydkug3UIGI3cUerNAVVkdhPDsZKM5gbOBkuiRmrXRjtGhmD")
+  kanye = Artist("Kanye West", genius)
+  kanye.create_graph_bfs()
+  kanye.show_graph()
 #madlib = Artist("Madlib", genius)
 #madlib.create_graph_bfs(2)
 #madlib.show_graph()
-#jamestaylor = Artist("James Taylor", genius)
-#jamestaylor.create_graph_bfs(2)
-#jamestaylor.show_graph()
