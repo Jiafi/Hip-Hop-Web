@@ -48,6 +48,38 @@ class Artist:
             if feature not in visited:
               artist_queue.put(feature)
 
+  def create_graph_dfs(self, artist_limit=10, song_limit=20):
+    artist_stack = []
+    artist_stack.append(self.name)
+    visited = set()
+    visited_songs = set()
+    while(len(visited) <= artist_limit and artist_stack):
+      current_artist = artist_stack.pop()
+      visited.add(current_artist)
+      artist = genius.search_artist(current_artist, max_songs=song_limit, sort='popularity')
+      # Get artists associated with current artist
+      for song in artist.songs:
+        # Do not want to repeat songs, waste of processing
+        if (song.title not in visited_songs):
+          visited_songs.add(song.title)
+          # Add to queue in this block such that queue is by popularity of the song
+          # it adds weight to edges based on # of features
+          current_features = set()
+          for feature in song.featured_artists:
+            current_features.add(feature['name'])
+          #for feature in song.producers:
+            #current_features.add(feature['name'])
+
+          # Create tuples to add edges
+          # add features to graph
+          # Done processing features
+          for feature in current_features:
+            # Adding edges and to the queue
+            self.__increment_edge(current_artist, feature)
+            if feature not in visited:
+              artist_stack.append(feature)
+
+
   def show_graph(self):
 
     plt.subplot(121)
@@ -67,7 +99,8 @@ class Artist:
 if __name__ == "__main__":
   genius = lyricsgenius.Genius("Ac918_2foSjtvsZXSydkug3UIGI3cUerNAVVkdhPDsZKM5gbOBkuiRmrXRjtGhmD")
   kanye = Artist("Kanye West", genius)
-  kanye.create_graph_bfs()
+  #kanye.create_graph_bfs()
+  kanye.create_graph_dfs()
   kanye.show_graph()
 #madlib = Artist("Madlib", genius)
 #madlib.create_graph_bfs(2)
