@@ -100,7 +100,7 @@ if __name__ == "__main__":
   genius = lyricsgenius.Genius("Ac918_2foSjtvsZXSydkug3UIGI3cUerNAVVkdhPDsZKM5gbOBkuiRmrXRjtGhmD")
   kanye = Artist("Kanye West", genius)
   #kanye.create_graph_bfs()
-  kanye.create_graph_dfs()
+  kanye.create_graph_dfs(artist_limit=100, song_limit=100)
   kanye.show_graph()
 #madlib = Artist("Madlib", genius)
 #madlib.create_graph_bfs(2)
