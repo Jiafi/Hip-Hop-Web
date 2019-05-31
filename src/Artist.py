@@ -4,6 +4,8 @@ import lyricsgenius
 import networkx as nx
 import matplotlib.pyplot as plt
 import queue
+import os
+
 class Artist:
 
   def __init__(self, name, genius):
@@ -97,7 +99,8 @@ class Artist:
     print(self.__graph.get_edge_data(source, dest))
 
 if __name__ == "__main__":
-  genius = lyricsgenius.Genius("Ac918_2foSjtvsZXSydkug3UIGI3cUerNAVVkdhPDsZKM5gbOBkuiRmrXRjtGhmD")
+  genius_token = os.environ.get('GENIUS_TOKEN')
+  genius = lyricsgenius.Genius(genius_token)
   kanye = Artist("Kanye West", genius)
   #kanye.create_graph_bfs()
   kanye.create_graph_dfs(artist_limit=100, song_limit=100)
