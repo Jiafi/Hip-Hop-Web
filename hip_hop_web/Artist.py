@@ -14,8 +14,8 @@ class Artist:
     self.__artists = set([name])
     # genius api object expected
     self.__genius = genius
-    self.__graph = nx.Graph()
-    self.__graph.add_node(name)
+    self.graph = nx.Graph()
+    self.graph.add_node(name)
 
   # BFS with additional processing to create edges and other info
   # BFS will show more closely related artists than DFS
@@ -27,19 +27,20 @@ class Artist:
     while(len(visited) <= artist_limit and not artist_queue.empty()):
       current_artist = artist_queue.get()
       visited.add(current_artist)
-      artist = genius.search_artist(current_artist, max_songs=song_limit, sort='popularity')
+      artist = self.__genius.search_artist(current_artist, max_songs=song_limit, sort='popularity')
       # Get artists associated with current artist
-      for song in artist.songs:
+      for song_object in artist.songs:
         # Do not want to repeat songs, waste of processing
-        if (song.title not in visited_songs):
-          visited_songs.add(song.title)
+        song = song_object.to_dict()
+        if (song["title"] not in visited_songs):
+          visited_songs.add(song["title"])
           # Add to queue in this block such that queue is by popularity of the song
           # it adds weight to edges based on # of features
           current_features = set()
-          for feature in song.featured_artists:
+          for feature in song["featured_artists"]:
             current_features.add(feature['name'])
-          #for feature in song.producers:
-            #current_features.add(feature['name'])
+          for feature in song["producer_artists"]:
+            current_features.add(feature['name'])
 
           # Create tuples to add edges
           # add features to graph
@@ -58,19 +59,20 @@ class Artist:
     while(len(visited) <= artist_limit and artist_stack):
       current_artist = artist_stack.pop()
       visited.add(current_artist)
-      artist = genius.search_artist(current_artist, max_songs=song_limit, sort='popularity')
+      artist = self.__genius.search_artist(current_artist, max_songs=song_limit, sort='popularity')
       # Get artists associated with current artist
-      for song in artist.songs:
+      for song_object in artist.songs:
+        song = song_object.to_dict()
         # Do not want to repeat songs, waste of processing
-        if (song.title not in visited_songs):
-          visited_songs.add(song.title)
+        if (song["title"] not in visited_songs):
+          visited_songs.add(song["title"])
           # Add to queue in this block such that queue is by popularity of the song
           # it adds weight to edges based on # of features
           current_features = set()
-          for feature in song.featured_artists:
+          for feature in song["featured_artists"]:
             current_features.add(feature['name'])
-          #for feature in song.producers:
-            #current_features.add(feature['name'])
+          for feature in song["producer_artists"]:
+            current_features.add(feature['name'])
 
           # Create tuples to add edges
           # add features to graph
@@ -87,16 +89,16 @@ class Artist:
     plt.subplot(121)
 
     plt.figure(figsize=(18.5, 11.5))
-    plot = nx.draw(self.__graph, with_labels=True)
+    plot = nx.draw(self.graph, with_labels=True)
     plt.show()
 
   def __increment_edge(self, source, dest):
-    edge = self.__graph.get_edge_data(source, dest)
+    edge = self.graph.get_edge_data(source, dest)
     if edge is None:
-      self.__graph.add_edge(source, dest, weight=1)
+      self.graph.add_edge(source, dest, weight=1)
     else:
-      self.__graph.add_edge(source, dest, weight=edge['weight']+1)
-    print(self.__graph.get_edge_data(source, dest))
+      self.graph.add_edge(source, dest, weight=edge['weight']+1)
+    print(self.graph.get_edge_data(source, dest))
 
 if __name__ == "__main__":
   genius_token = os.environ.get('GENIUS_TOKEN')
@@ -105,6 +107,4 @@ if __name__ == "__main__":
   #kanye.create_graph_bfs()
   kanye.create_graph_dfs(artist_limit=100, song_limit=100)
   kanye.show_graph()
-#madlib = Artist("Madlib", genius)
-#madlib.create_graph_bfs(2)
-#madlib.show_graph()
+
